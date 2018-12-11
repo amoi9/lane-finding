@@ -1,47 +1,72 @@
 # **Finding Lane Lines on the Road** 
 
-## Writeup Template
 
-### You can use this file as a template for your writeup if you want to submit it as a markdown file. But feel free to use some other method and submit a pdf if you prefer.
+## Goals
 
----
-
-**Finding Lane Lines on the Road**
-
-The goals / steps of this project are the following:
 * Make a pipeline that finds lane lines on the road
 * Reflect on your work in a written report
 
 
 [//]: # (Image References)
 
-[image1]: ./examples/grayscale.jpg "Grayscale"
+[before_draw_lines]: ./test_images_intermediate/solidYellowCurve2.png "before_draw_lines"
+[after_draw_lines]: ./test_images_output/solidYellowCurve2.png "after_draw_lines"
+[higher_poly]: ./test_images_intermediate/solidYellowCurve.png "higher_poly"
 
 ---
 
-### Reflection
+## Reflection
 
-### 1. Describe your pipeline. As part of the description, explain how you modified the draw_lines() function.
+### How the pipeline works
 
-My pipeline consisted of 5 steps. First, I converted the images to grayscale, then I .... 
+My pipeline consisted of 5 steps:
+1. Converted the images to grayscale.
+2. Add Gaussian smoothing to the grayscaled image in order to reduce noice.
+3. Detect Canny edges.
+4. Apply Hough transform to selected region of interest from the Canny edges, and draw the lines on a blank image.
+5. Draw the lines on the original image using the `weighted_img` method.
 
-In order to draw a single line on the left and right lanes, I modified the draw_lines() function by ...
+After the 5 steps the output image looks like this:
 
-If you'd like to include images to show how the pipeline works, here is how to include an image: 
-
-![alt text][image1]
-
-
-### 2. Identify potential shortcomings with your current pipeline
-
-
-One potential shortcoming would be what would happen when ... 
-
-Another shortcoming could be ...
+![alt text][before_draw_lines]
 
 
-### 3. Suggest possible improvements to your pipeline
+In order to draw a single line on the left and right lanes, I modified the `draw_lines` function. The steps are:
+1. Separate out lines into the left and right lane by inspecting their slope. 
+   * I introduced some thresholds for the positive and negative slopes to remove noise.
+   * The output is a list of points for the left lane, and another list for the right lane. 
+2. Extrapolate the points in each lane to one single line.
+   * I used the `polyfit` method from the `numpy` library with `degree = 1` to get the coefficient and intercept for the
+   list of points.
+   * I used the `poly1d` method to get the polynomial function.
+   * I applied the polynomial function to the minimal and maximum `x` coordinates to get the start and end points to 
+   draw the line on.
+3. Draw the line between the two points returned from the above step using the `cv2.line` method, for both left and right 
+   lanes.
 
-A possible improvement would be to ...
+After modifying the `draw_line` method the output image is:
 
-Another potential improvement could be to ...
+![alt text][after_draw_lines]
+
+For the optional challenge I changed to use higher degree polynomical functions, then used the `linspace` method from 
+`numpy` to slice the between the maximum and minimum `x` coordinates, and then connected dots in between with `cv2.line`.
+It didn't break the straight lane cases, unfortunately it isn't sufficient for the curves case. (The changes start from 
+the `draw_lines_higher_poly` method)
+
+### Potential shortcomings with the pipeline
+
+One shortcoming is the pipeline still cannot handle curved lanes. In the output vedio the left lane drawing is off the 
+lane and the right one the convex isn't in the expected direction.
+
+### Possible improvements
+
+A possible improvement is to tune parameters for Canny, Hough, etc, to see if things improve 
+(after I used the higher polynomial method I didn't go back to adjust the params).
+
+Another possible improvement is to look more into the `numpy` and `cv2` libraries to see what helps. 
+
+Notice that for the `solidYellowCurve.jpg` test image the output isn't detecting the left curve in the correct direction:
+
+![alt text][higher_poly]
+
+I can use this image as a test file to tune and iterate.
