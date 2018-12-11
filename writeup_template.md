@@ -9,8 +9,8 @@
 
 [//]: # (Image References)
 
-[before_draw_lines]: ./test_images_intermediate/solidYellowCurve2.png "before_draw_lines"
-[after_draw_lines]: ./test_images_output/solidYellowCurve2.png "after_draw_lines"
+[before_draw_lines]: ./test_images_intermediate/solidWhiteRight.png "before_draw_lines"
+[after_draw_lines]: ./test_images_output/solidWhiteRight.png "after_draw_lines"
 [higher_poly]: ./test_images_intermediate/solidYellowCurve.png "higher_poly"
 
 ---
@@ -58,15 +58,26 @@ the `draw_lines_higher_poly` method)
 One shortcoming is the pipeline still cannot handle curved lanes. In the output vedio the left lane drawing is off the 
 lane and the right one the convex isn't in the expected direction.
 
+Another shortcoming is the red line doesn't cover white lane that well, notice the right lane the test output above.
+
 ### Possible improvements
 
-A possible improvement is to tune parameters for Canny, Hough, etc, to see if things improve 
+#### The curve
+
+* A possible improvement is to tune parameters for Canny, Hough, etc, to see if things improve 
 (after I used the higher polynomial method I didn't go back to adjust the params).
 
-Another possible improvement is to look more into the `numpy` and `cv2` libraries to see what helps. 
+* Another possible improvement is to look more into the `numpy` and `cv2` libraries to see what helps. 
 
 Notice that for the `solidYellowCurve.jpg` test image the output isn't detecting the left curve in the correct direction:
 
 ![alt text][higher_poly]
 
 I can use this image as a test file to tune and iterate.
+
+#### The red line coverage
+
+I adjusted the `thickness` param of the `cv2.line` method to be `15` from the default `2`, it does increase the width 
+of the red line but doesn't cover the white color that well. We'll want some way to reduce the white color in the original 
+image, maybe by tuing the `weighted_img` params?
+ 
